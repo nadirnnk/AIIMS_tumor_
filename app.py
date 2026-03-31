@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, send_from_directory
-import google.generativeai as genai
+import google.genai as genai
 import os
 import json
 from flask_cors import CORS
