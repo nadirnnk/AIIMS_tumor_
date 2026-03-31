@@ -16,11 +16,13 @@ def serve_frontend():
 
 @app.route('/api/extract', methods=['POST'])
 def extract_features():
-    api_key = request.form.get('api_key')
+    api_key = os.getenv("GEMINI_API_KEY")
+
     if not api_key:
-        return jsonify({"error": "Gemini API key is required."}), 400
+        return jsonify({"error": "Server missing API key"}), 500
 
     genai.configure(api_key=api_key)
+
     # Initialize the model using the provided API key
     model = genai.GenerativeModel('gemini-2.5-flash')
 
@@ -131,6 +133,5 @@ def extract_features():
 if __name__ == '__main__':
     # Ensure static directory exists
     os.makedirs('static', exist_ok=True)
-    print("Server running on http://127.0.0.1:5000")
-    app.run(debug=True, host='127.0.0.1', port=5000)
+
     
