@@ -1,11 +1,11 @@
 from flask import Flask, request, jsonify, send_from_directory
-import google.genai as genai
+import google.generativeai as genai
 import os
 import json
 from flask_cors import CORS
 
 app = Flask(__name__, static_folder='static')
-CORS(app, origins=["https://aiimstumor.vercel.app/"])  # Enable CORS for all routes
+CORS(app, origins=["https://aiimstumor.vercel.app", "https://aiimstumor.vercel.app/"])  # Enable CORS for Vercel
 
 # Make sure to set this environment variable before running the app
 # os.environ["GEMINI_API_KEY"] = "your_api_key_here"
@@ -131,7 +131,7 @@ def extract_features():
         return jsonify({"error": "Invalid file format. Please upload a PDF file."}), 400
 
 if __name__ == '__main__':
-    # Ensure static directory exists
     os.makedirs('static', exist_ok=True)
-
+    print("Server running on http://127.0.0.1:5000")
+    app.run(debug=True, host='127.0.0.1', port=5000)
     
