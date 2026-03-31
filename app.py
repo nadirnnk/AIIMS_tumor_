@@ -5,7 +5,7 @@ import json
 from flask_cors import CORS
 
 app = Flask(__name__, static_folder='static')
-CORS(app, origins=["https://aiimstumor.vercel.app", "https://aiimstumor.vercel.app/"])  # Enable CORS for Vercel
+CORS(app, supports_credentials=True)  # Enable CORS for all routes
 
 # Make sure to set this environment variable before running the app
 # os.environ["GEMINI_API_KEY"] = "your_api_key_here"
