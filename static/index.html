@@ -225,9 +225,9 @@
             const btn = document.getElementById('extractBtn');
             const btnText = document.getElementById('btnText');
             const loader = document.getElementById('loader');
-            const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
-                ? 'http://127.0.0.1:5000/api/extract' 
-                : 'https://aiims-tumor.onrender.com/api/extract';
+            const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                ? 'http://127.0.0.1:5000/api/extract'
+                : 'https://aiims-tumor-2.onrender.com/api/extract';
 
             if (fileInput.files.length === 0) {
                 alert('Please select a PDF file to upload.');
