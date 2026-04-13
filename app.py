@@ -14,6 +14,10 @@ CORS(app, supports_credentials=True)  # Enable CORS for all routes
 def serve_frontend():
     return send_from_directory('static', 'index.html')
 
+@app.route('/images/<path:filename>')
+def serve_images(filename):
+    return send_from_directory('images', filename)
+
 @app.route('/api/extract', methods=['POST'])
 def extract_features():
     api_key = os.getenv("GEMINI_API_KEY")
