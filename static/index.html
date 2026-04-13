@@ -134,17 +134,82 @@
         }
 
         pre {
-            background-color: #2D3436;
-            color: #A8FF60;
-            padding: 20px;
+            background-color: #fee2e2;
+            color: #b91c1c;
+            padding: 16px;
             border-radius: 8px;
             overflow-x: auto;
-            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-family: 'Segoe UI', Tahoma, Verdana, sans-serif;
             font-size: 14px;
-            min-height: 200px;
-            border: 1px solid #1E272E;
+            border: 1px solid #f87171;
             white-space: pre-wrap;
             box-sizing: border-box;
+            display: none;
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--surface);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin-top: 10px;
+        }
+
+        .result-table th, .result-table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-table th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-table td {
+            font-size: 15px;
+            line-height: 1.5;
+            color: var(--text-main);
+        }
+
+        .result-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .result-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .result-table tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        .feature-name {
+            font-weight: 600;
+            color: var(--primary);
+            width: 40%;
+            vertical-align: top;
+        }
+
+        .feature-value {
+            vertical-align: top;
+        }
+
+        .placeholder-text {
+            background-color: #f8fafc;
+            color: #64748b;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            font-style: italic;
+            border: 1px dashed #cbd5e1;
+            margin-top: 10px;
         }
 
         .loader {
@@ -199,12 +264,37 @@
         </button>
 
         <div class="output-group">
-            <label for="jsonOutput">Extracted JSON Structure:</label>
-            <pre id="jsonOutput">// Extracted JSON will appear here...</pre>
+            <label>Extraction Results:</label>
+            <div id="tableContainer">
+                <div class="placeholder-text" id="outputPlaceholder">Extracted data will appear here...</div>
+            </div>
+            <pre id="jsonOutput"></pre>
         </div>
     </div>
 
     <script>
+        function formatKey(key) {
+            return key.replace(/_/g, ' ')
+                      .split(' ')
+                      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                      .join(' ');
+        }
+
+        function formatValue(value) {
+            if (value === null || value === undefined || value === "") {
+                return '<span style="color: #94a3b8; font-style: italic;">Not explicitly mentioned</span>';
+            }
+            if (typeof value === 'boolean' || value === 'TRUE' || value === 'FALSE' || value === 'true' || value === 'false') {
+                const isTrue = value === true || value === 'TRUE' || value === 'true';
+                return isTrue ? '<span style="color: #16a34a; font-weight: bold;">Yes</span>' : '<span style="color: #dc2626; font-weight: bold;">No</span>';
+            }
+            if (typeof value === 'object') {
+                if (Array.isArray(value)) return value.join(', ');
+                return JSON.stringify(value);
+            }
+            return String(value);
+        }
+
         function displayFileName() {
             const fileInput = document.getElementById('reportFile');
             const fileNameDisplay = document.getElementById('fileName');
@@ -222,6 +312,7 @@
         async function extractFeatures() {
             const fileInput = document.getElementById('reportFile');
             const outputArea = document.getElementById('jsonOutput');
+            const tableContainer = document.getElementById('tableContainer');
             const btn = document.getElementById('extractBtn');
             const btnText = document.getElementById('btnText');
             const loader = document.getElementById('loader');
@@ -247,8 +338,8 @@
             btn.disabled = true;
             btnText.style.display = 'none';
             loader.style.display = 'block';
-            outputArea.textContent = 'Processing PDF with Gemini API...';
-            outputArea.style.color = '#FDCB6E'; // Loading color
+            outputArea.style.display = 'none';
+            tableContainer.innerHTML = '<div class="placeholder-text" style="color: #d97706; border-color: #fcd34d; background-color: #fef3c7;">Processing Medical PDF... This might take a moment.</div>';
 
             try {
                 // Send the FormData via POST to backend
@@ -264,14 +355,22 @@
                 }
 
                 // Success
-                outputArea.textContent = JSON.stringify(data, null, 4);
-                outputArea.style.color = '#A8FF60'; // Success color
+                let tableHtml = '<table class="result-table"><thead><tr><th>Clinical Feature</th><th>Extracted Findings</th></tr></thead><tbody>';
+                for (const [key, value] of Object.entries(data)) {
+                    tableHtml += `<tr>
+                        <td class="feature-name">${formatKey(key)}</td>
+                        <td class="feature-value">${formatValue(value)}</td>
+                    </tr>`;
+                }
+                tableHtml += '</tbody></table>';
+                tableContainer.innerHTML = tableHtml;
 
             } catch (error) {
                 // Error
                 console.error('Extraction Error:', error);
+                tableContainer.innerHTML = '';
+                outputArea.style.display = 'block';
                 outputArea.textContent = `Error: ${error.message}`;
-                outputArea.style.color = '#FF7675'; // Error color
             } finally {
                 // UI State: Reset
                 btn.disabled = false;
